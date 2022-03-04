@@ -18,7 +18,7 @@ public class UserData {       /// bind name with sending channel to make it reac
     }
 
     public void sendMessage(String sender, String message){
-        this.out.println(sender + ":" + message);
+        this.out.println(sender + ": " + message);
     }
 
     @Override

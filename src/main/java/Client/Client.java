@@ -8,7 +8,7 @@ import java.net.Socket;
 
 public class Client {
     public static boolean register(String name, BufferedReader in, PrintWriter out) throws IOException {
-        out.println("Name:" + name);
+        out.println("--register:" + name);
         String response = in.readLine();
         if(!response.equals("error")) {
             System.out.println("You succesfully registered with login " + response);

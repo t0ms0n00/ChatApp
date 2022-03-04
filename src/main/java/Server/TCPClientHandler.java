@@ -27,13 +27,17 @@ public class TCPClientHandler implements Runnable{
                 System.out.println("Received message " + msg);
 
                 if(msg.equals("/q")) { /// leave command
+                    sendToOthers("* leaves the chat *");
                     unregister();
                     break;
                 }
-                else if(msg.startsWith("Name")){   /// register command
+                else if(msg.startsWith("--register")){   /// register command
                     String[] messageSplit = msg.split(":", 2);
                     String name = messageSplit[1];
-                    if(!register(name)){        /// when registration failed
+                    if(register(name)){
+                        sendToOthers("* enters the chat *");
+                    }
+                    else{ /// when registration failed
                         break;
                     }
                 }
