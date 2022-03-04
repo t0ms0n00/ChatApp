@@ -1,0 +1,7 @@
+Server\UserData.class
+Server\TCPClientHandler.class
+Client\Reader.class
+Server\Server.class
+Server\TCPChannelListener.class
+Client\Client.class
+Client\Writer.class
