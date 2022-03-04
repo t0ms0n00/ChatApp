@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Reader implements Runnable{
-    Socket socket;
-    BufferedReader in;
+    private Socket socket;
+    private BufferedReader in;
 
     Reader(Socket socket, BufferedReader input) throws IOException {
         this.socket = socket;

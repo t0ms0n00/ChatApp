@@ -6,9 +6,9 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Writer implements Runnable{
-    Socket socket;
-    Scanner in;
-    PrintWriter out;
+    private Socket socket;
+    private Scanner in;
+    private PrintWriter out;
 
     Writer(Socket socket, PrintWriter output) throws IOException {
         this.socket = socket;

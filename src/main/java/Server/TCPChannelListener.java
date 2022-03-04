@@ -4,14 +4,17 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 
 public class TCPChannelListener implements Runnable{
-    int portNumber;
-    Set<UserData> users;
+    private int portNumber;
+    private Set<UserData> users;
+    private Lock lock;
 
-    TCPChannelListener(int port, Set<UserData> users){
+    TCPChannelListener(int port, Set<UserData> users, Lock userLock){
         this.portNumber = port;
         this.users = users;
+        this.lock = userLock;
     }
 
     @Override
@@ -23,7 +26,7 @@ public class TCPChannelListener implements Runnable{
             while(true){
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected");
-                Thread thread = new Thread(new TCPClientHandler(clientSocket, users)); /// client socket pass
+                Thread thread = new Thread(new TCPClientHandler(clientSocket, users, lock)); /// client socket pass
                 thread.start();
             }
         }

@@ -7,17 +7,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Client {
-    public static boolean register(String name, BufferedReader in, PrintWriter out) throws IOException {
-        out.println("--register:" + name);
-        String response = in.readLine();
-        if(!response.equals("error")) {
-            System.out.println("You succesfully registered with login " + response);
-            return true;
-        }
-        System.out.println("The login is taken " + response);
-        return false;
-    }
-
     public static void main(String[] args) throws IOException {
         int serverPort = 8080;
         String serverAddress = "localhost";
@@ -49,5 +38,16 @@ public class Client {
                 socket.close();
             }
         }
+    }
+
+    public static boolean register(String name, BufferedReader in, PrintWriter out) throws IOException {
+        out.println("--register:" + name);
+        String response = in.readLine();
+        if(!response.equals("error")) {
+            System.out.println("You succesfully registered with login " + response);
+            return true;
+        }
+        System.out.println("The login is taken " + response);
+        return false;
     }
 }
