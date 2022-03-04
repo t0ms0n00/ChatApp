@@ -41,9 +41,6 @@ public class Client {
                 reader.join();      /// writer and reader finish job with receiving /q, but socket will be closed later
                 writer.join();
             }
-            else{
-                output.println("/q");
-            }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

@@ -24,7 +24,7 @@ public class TCPClientHandler implements Runnable{
         while(true){
             try {
                 msg = in.readLine();
-                /// System.out.println("Received message " + msg);
+                System.out.println("Received message " + msg);
 
                 if(msg.equals("/q")) { /// leave command
                     unregister();
@@ -33,7 +33,9 @@ public class TCPClientHandler implements Runnable{
                 else if(msg.startsWith("Name")){   /// register command
                     String[] messageSplit = msg.split(":", 2);
                     String name = messageSplit[1];
-                    register(name);
+                    if(!register(name)){        /// when registration failed
+                        break;
+                    }
                 }
                 else{ /// TCP communication
                     sendToOthers(msg);
@@ -51,15 +53,15 @@ public class TCPClientHandler implements Runnable{
         }
     }
 
-    public void register(String name){
+    public boolean register(String name){
         if(users.contains(new UserData(name))){
             out.println("error");
+            return false;
         }
-        else{
-            users.add(new UserData(name, out));  /// register my output and name
-            out.println(name);
-            login = name;
-        }
+        users.add(new UserData(name, out));  /// register my output and name
+        out.println(name);
+        login = name;
+        return true;
     }
 
     public void unregister(){
