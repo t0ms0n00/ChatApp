@@ -30,7 +30,7 @@ public class TCPClientHandler implements Runnable{
         while(true){
             try {
                 msg = in.readLine();
-                System.out.println("[TCP] Received message: " + msg);
+                System.out.println("[TCP] Received: " + msg);
 
                 /// special commands first, anything else is message
                 if(msg.startsWith("/register")){   /// register command
@@ -51,6 +51,7 @@ public class TCPClientHandler implements Runnable{
 
             } catch (IOException e) {
                 sendToOthers("* leaves the chat *");
+                System.out.println("[TCP] Client disconnected");
                 unregister();
                 break;
             }

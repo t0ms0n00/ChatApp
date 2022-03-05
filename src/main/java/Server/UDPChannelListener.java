@@ -3,19 +3,19 @@ package Server;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 public class UDPChannelListener implements Runnable{
 
+    private DatagramSocket socket;
     private int portNumber;
     private Set<UserData> users;
     private Lock lock;
-    private DatagramSocket socket = null;
 
-    UDPChannelListener(int port, Set<UserData> users, Lock userLock){
+    UDPChannelListener(DatagramSocket socket, int port, Set<UserData> users, Lock userLock){
+        this.socket = socket;
         this.portNumber = port;
         this.users = users;
         this.lock = userLock;
@@ -23,13 +23,6 @@ public class UDPChannelListener implements Runnable{
 
     @Override
     public void run() {
-        /* socket init */
-        try {
-            socket = new DatagramSocket(portNumber);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-
         /* working */
         System.out.println("[UDP] SERVER starts working on port: " + portNumber);
         byte[] receiveBuffer = new byte[1024];
@@ -47,16 +40,6 @@ public class UDPChannelListener implements Runnable{
             }
             catch (IOException e){
                 break;
-            }
-        }
-
-        /* close socket */
-        if(socket != null){
-            try{
-                socket.close();
-            }
-            catch (Exception e){
-                e.printStackTrace();
             }
         }
     }

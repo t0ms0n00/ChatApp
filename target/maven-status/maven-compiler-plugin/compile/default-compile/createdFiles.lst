@@ -1,6 +1,7 @@
 Client\UDPReader.class
 Server\UserData.class
 Server\TCPClientHandler.class
+Client\MulticastReader.class
 Server\Server.class
 Server\TCPChannelListener.class
 Client\Client.class

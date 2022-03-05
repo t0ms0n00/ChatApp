@@ -2,30 +2,37 @@ package Client;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.net.*;
 import java.util.Scanner;
 
 public class Writer implements Runnable{
     private String login;
-    private InetAddress address;
-    private int serverPort;
     private Socket tcpSocket;
-    private DatagramSocket udpSocket;
     private Scanner in;
     private PrintWriter out;
+    private DatagramSocket udpSocket;
+    private InetAddress address;
+    private int serverPort;
+    private MulticastSocket multicastSocket;
+    private InetAddress group;
+    private int multicastPort;
 
-    Writer(String name, Socket tcpSocket, PrintWriter output, DatagramSocket udpSocket, InetAddress address,
-           int serverPort) {
+    Writer(String name, Socket tcpSocket, PrintWriter output, DatagramSocket udpSocket,
+           InetAddress address, int serverPort, MulticastSocket multicastSocket, InetAddress group, int multicastPort) {
         this.login = name;
+
+        this.tcpSocket = tcpSocket; /// tcp
+        this.out = output;
+        this.in = new Scanner(System.in);
+
+        this.udpSocket = udpSocket; /// udp
         this.address = address;
         this.serverPort = serverPort;
-        this.tcpSocket = tcpSocket;
-        this.udpSocket = udpSocket;
-        this.in = new Scanner(System.in);
-        this.out = output;
+
+        this.multicastSocket = multicastSocket; /// multicast
+        this.group = group;
+        this.multicastPort = multicastPort;
+
     }
 
     @Override
@@ -38,6 +45,11 @@ public class Writer implements Runnable{
                     byte[] sendBuffer = (login + ":" + line.substring(2)).getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, serverPort);
                     udpSocket.send(sendPacket);
+                }
+                else if(line.startsWith("M ")){     /// multicast
+                    byte[] sendBuffer = (login + ": " + line.substring(2)).getBytes();
+                    DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, group, multicastPort);
+                    multicastSocket.send(sendPacket);
                 }
                 else{   /// send by tcp
                     out.println(line);

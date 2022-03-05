@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.Socket;
 
 public class Client {
@@ -13,12 +14,16 @@ public class Client {
         String name = args[0];
         String serverAddress = "localhost";
         int serverPort = 8080;
+        String multicastAddress = "230.0.0.0";
+        int multicastPort = 8081;
 
         Socket tcpSocket;
         DatagramSocket udpSocket;
+        MulticastSocket multicastSocket;
 
         Thread tcpReader;
         Thread udpReader;
+        Thread multicastReader;
         Thread writer;
 
         tcpSocket = new Socket(serverAddress, serverPort);
@@ -28,19 +33,32 @@ public class Client {
         udpSocket = new DatagramSocket();
         InetAddress address = InetAddress.getByName(serverAddress);
 
+        multicastSocket = new MulticastSocket(multicastPort);
+        InetAddress group = InetAddress.getByName(multicastAddress);
+        multicastSocket.joinGroup(group);
+
         if(register(name, input, output, udpSocket, address)){ /// if registered successfully start threads
             tcpReader = new Thread(new TCPReader(tcpSocket, input));
             udpReader = new Thread(new UDPReader(udpSocket));
-            writer = new Thread(new Writer(name, tcpSocket, output, udpSocket, address, serverPort));
+            multicastReader = new Thread(new MulticastReader(multicastSocket, name));
+            writer = new Thread(new Writer(name, tcpSocket, output, udpSocket, address, serverPort,
+                    multicastSocket, group, multicastPort));
 
             tcpReader.start();
             udpReader.start();
+            multicastReader.start();
             writer.start();
 
             tcpReader.join();   /// wait till all threads finish job - when client is ending connection
             udpReader.join();
+            multicastReader.join();
             writer.join();
 
+        }
+
+        if(multicastSocket != null){
+            multicastSocket.leaveGroup(group);
+            multicastSocket.close();
         }
 
         if(udpSocket != null){

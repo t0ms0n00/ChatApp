@@ -19,7 +19,7 @@ public class TCPReader implements Runnable{
         while(true){
             try {
                 line = in.readLine();
-                System.out.println(line);
+                System.out.println("[TCP] " + line);
             } catch (IOException e) {
                 break;
             }
