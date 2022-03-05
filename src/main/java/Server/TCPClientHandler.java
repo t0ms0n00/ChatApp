@@ -1,7 +1,9 @@
 package Server;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
@@ -28,13 +30,15 @@ public class TCPClientHandler implements Runnable{
         while(true){
             try {
                 msg = in.readLine();
-                System.out.println("[TCP] Received message " + msg);
+                System.out.println("[TCP] Received message: " + msg);
 
                 /// special commands first, anything else is message
                 if(msg.startsWith("/register")){   /// register command
-                    String[] messageSplit = msg.split(":", 2);
+                    String[] messageSplit = msg.split("--");
                     String name = messageSplit[1];
-                    if(register(name)){
+                    String address = messageSplit[2];
+                    int port = Integer.parseInt(messageSplit[3]);
+                    if(register(name, address, port)){
                         sendToOthers("* enters the chat *");
                     }
                     else{ /// when registration failed
@@ -59,15 +63,23 @@ public class TCPClientHandler implements Runnable{
         }
     }
 
-    public boolean register(String name){
+    public boolean register(String name, String address, int port) {
         lock.lock();
         if(users.contains(new UserData(name))){
-            out.println("/error");
+            out.println("/error_1");
             lock.unlock();
             return false;
         }
         UserData user = new UserData(name); /// register my output and name
         user.setOutputChanel(out);
+        try {
+            user.setAddress(InetAddress.getByName(address));    /// save info about udp data
+        } catch (UnknownHostException e) {
+            out.println("/error_2");
+            lock.unlock();
+            return false;
+        }
+        user.setUdpPort(port);
         users.add(user);
         lock.unlock();
 

@@ -21,7 +21,7 @@ public class UDPReader implements Runnable {
                 Arrays.fill(receiveBuffer, (byte)0);
                 DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(receivePacket);  /// wait for message
-                String msg = new String(receivePacket.getData());
+                String msg = new String(receivePacket.getData(), 0, receivePacket.getLength());
                 System.out.println(msg);
             } catch (IOException e) {
                 break;

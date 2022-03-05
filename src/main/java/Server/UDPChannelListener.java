@@ -38,7 +38,7 @@ public class UDPChannelListener implements Runnable{
                 Arrays.fill(receiveBuffer, (byte)0);
                 DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(receivePacket);
-                String msg = new String(receivePacket.getData());
+                String msg = new String(receivePacket.getData(), 0, receivePacket.getLength());
                 System.out.println("[UDP] Received message: " + msg);
                 String[] msgParts = msg.split(":",2);
                 String login = msgParts[0];
@@ -61,11 +61,14 @@ public class UDPChannelListener implements Runnable{
         }
     }
 
-    public void sendToOthers(String message, String login){
+    public void sendToOthers(String message, String login) throws IOException {
         lock.lock();
         for(UserData user: users){
-            if(!user.equals(new UserData(login)))    /// different user - send
-                user.getOutputChanel().println(login + ": " + message);
+            if(!user.equals(new UserData(login))) {  /// different user - send
+                String msg_wrapper = "[UDP] " + login + ": " + message;
+                byte[] sendBuffer = msg_wrapper.getBytes();
+                socket.send(new DatagramPacket(sendBuffer, sendBuffer.length, user.getAddress(), user.getUdpPort()));
+            }
         }
         lock.unlock();
     }

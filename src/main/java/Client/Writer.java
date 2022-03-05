@@ -35,7 +35,6 @@ public class Writer implements Runnable{
             try {
                 line = in.nextLine();
                 if(line.startsWith("U ")){     /// send by udp
-                    System.out.println("UDP MODE ON");
                     byte[] sendBuffer = (login + ":" + line.substring(2)).getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, serverPort);
                     udpSocket.send(sendPacket);

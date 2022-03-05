@@ -1,11 +1,14 @@
 package Server;
 
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.util.Objects;
 
 public class UserData {       /// bind name with sending channel to make it reachable for any other user in server "database"
     private String login;
     private PrintWriter out;        /// for tcp
+    private InetAddress address;
+    private int udpPort;
 
     UserData(String login){   /// only for contains and equals purposes
         this.login = login;
@@ -13,6 +16,14 @@ public class UserData {       /// bind name with sending channel to make it reac
 
     public void setOutputChanel(PrintWriter out){
         this.out = out;
+    }
+
+    public void setAddress(InetAddress address){
+        this.address = address;
+    }
+
+    public void setUdpPort(int udpPort) {
+        this.udpPort = udpPort;
     }
 
     public PrintWriter getOutputChanel(){
@@ -23,6 +34,13 @@ public class UserData {       /// bind name with sending channel to make it reac
         return login;
     }
 
+    public InetAddress getAddress() {
+        return address;
+    }
+
+    public int getUdpPort() {
+        return udpPort;
+    }
 
     @Override
     public boolean equals(Object o) {

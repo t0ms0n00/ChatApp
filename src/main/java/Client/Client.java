@@ -28,7 +28,7 @@ public class Client {
         udpSocket = new DatagramSocket();
         InetAddress address = InetAddress.getByName(serverAddress);
 
-        if(register(name, input, output)){ /// if registered successfully start threads
+        if(register(name, input, output, udpSocket, address)){ /// if registered successfully start threads
             tcpReader = new Thread(new TCPReader(tcpSocket, input));
             udpReader = new Thread(new UDPReader(udpSocket));
             writer = new Thread(new Writer(name, tcpSocket, output, udpSocket, address, serverPort));
@@ -51,14 +51,19 @@ public class Client {
         }
     }
 
-    public static boolean register(String name, BufferedReader in, PrintWriter out) throws IOException {
-        out.println("/register:" + name);   /// register cmd flag and name as info for server
+    public static boolean register(String name, BufferedReader in, PrintWriter out, DatagramSocket udpSocket, InetAddress address) throws IOException {
+        int port = udpSocket.getLocalPort();
+        out.println("/register--" + name + "--" + address.getHostAddress() + "--" + port);   /// register cmd flag and name as info for server
         String response = in.readLine();    /// wait till server check if u can register
-        if(response.equals("/error")) {
+        if(response.equals("/error_1")) {   /// errors handle
             System.out.println("The login is taken!");
             return false;
         }
-        System.out.println("You succesfully logged as " + response);
+        if(response.equals("/error_2")) {
+            System.out.println("Unknown host address");
+            return false;
+        }
+        System.out.println("You successfully logged as " + response);
         return true;
     }
 }
