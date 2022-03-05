@@ -10,9 +10,12 @@ public class Server {
         int port = 8080;
         Set<UserData> users = new HashSet<>();
         Lock usersLock = new ReentrantLock();
-        Thread tcpListener = new Thread(new TCPChannelListener(port, users, usersLock));
 
-        /// start threads
+        Thread tcpListener = new Thread(new TCPChannelListener(port, users, usersLock));
+        Thread udpListener = new Thread(new UDPChannelListener(port, users, usersLock));
+
+        /// start threads listening different communication channels
         tcpListener.start();
+        udpListener.start();
     }
 }

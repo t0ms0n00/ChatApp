@@ -4,50 +4,61 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public class Client {
-    public static void main(String[] args) throws IOException {
-        int serverPort = 8080;
-        String serverAddress = "localhost";
-        Socket socket = null;
+    public static void main(String[] args) throws IOException, InterruptedException {
         String name = args[0];
+        String serverAddress = "localhost";
+        int serverPort = 8080;
 
-        try{
-            socket = new Socket(serverAddress, serverPort);
+        Socket tcpSocket;
+        DatagramSocket udpSocket;
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+        Thread tcpReader;
+        Thread udpReader;
+        Thread writer;
 
-            /// registered Client succesfully
-            if(register(name, input, output)){
-                Thread reader = new Thread(new Reader(socket, input));
-                Thread writer = new Thread(new Writer(socket, output));
+        tcpSocket = new Socket(serverAddress, serverPort);
+        BufferedReader input = new BufferedReader(new InputStreamReader(tcpSocket.getInputStream()));
+        PrintWriter output = new PrintWriter(tcpSocket.getOutputStream(), true);
 
-                reader.start();
-                writer.start();
+        udpSocket = new DatagramSocket();
+        InetAddress address = InetAddress.getByName(serverAddress);
 
-                reader.join();      /// writer and reader finish job with receiving /q, but socket will be closed later
-                writer.join();
-            }
+        if(register(name, input, output)){ /// if registered successfully start threads
+            tcpReader = new Thread(new TCPReader(tcpSocket, input));
+            udpReader = new Thread(new UDPReader(udpSocket));
+            writer = new Thread(new Writer(name, tcpSocket, output, udpSocket, address, serverPort));
 
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            if(socket != null){
-                socket.close();
-            }
+            tcpReader.start();
+            udpReader.start();
+            writer.start();
+
+            tcpReader.join();   /// wait till all threads finish job - when client is ending connection
+            udpReader.join();
+            writer.join();
+
+        }
+
+        if(udpSocket != null){
+            udpSocket.close();
+        }
+        if(tcpSocket != null){
+            tcpSocket.close();
         }
     }
 
     public static boolean register(String name, BufferedReader in, PrintWriter out) throws IOException {
-        out.println("--register:" + name);
-        String response = in.readLine();
-        if(!response.equals("error")) {
-            System.out.println("You succesfully registered with login " + response);
-            return true;
+        out.println("/register:" + name);   /// register cmd flag and name as info for server
+        String response = in.readLine();    /// wait till server check if u can register
+        if(response.equals("/error")) {
+            System.out.println("The login is taken!");
+            return false;
         }
-        System.out.println("The login is taken " + response);
-        return false;
+        System.out.println("You succesfully logged as " + response);
+        return true;
     }
 }

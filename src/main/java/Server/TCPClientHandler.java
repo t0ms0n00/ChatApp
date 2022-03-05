@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 public class TCPClientHandler implements Runnable{
+
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
@@ -27,14 +28,10 @@ public class TCPClientHandler implements Runnable{
         while(true){
             try {
                 msg = in.readLine();
-                System.out.println("Received message " + msg);
+                System.out.println("[TCP] Received message " + msg);
 
-                if(msg.equals("/q")) { /// leave command
-                    sendToOthers("* leaves the chat *");
-                    unregister();
-                    break;
-                }
-                else if(msg.startsWith("--register")){   /// register command
+                /// special commands first, anything else is message
+                if(msg.startsWith("/register")){   /// register command
                     String[] messageSplit = msg.split(":", 2);
                     String name = messageSplit[1];
                     if(register(name)){
@@ -49,7 +46,9 @@ public class TCPClientHandler implements Runnable{
                 }
 
             } catch (IOException e) {
-                e.printStackTrace();
+                sendToOthers("* leaves the chat *");
+                unregister();
+                break;
             }
         }
 
@@ -61,14 +60,16 @@ public class TCPClientHandler implements Runnable{
     }
 
     public boolean register(String name){
-        this.lock.lock();
+        lock.lock();
         if(users.contains(new UserData(name))){
-            out.println("error");
-            this.lock.unlock();
+            out.println("/error");
+            lock.unlock();
             return false;
         }
-        users.add(new UserData(name, out));  /// register my output and name
-        this.lock.unlock();
+        UserData user = new UserData(name); /// register my output and name
+        user.setOutputChanel(out);
+        users.add(user);
+        lock.unlock();
 
         out.println(name);
         login = name;
@@ -76,19 +77,17 @@ public class TCPClientHandler implements Runnable{
     }
 
     public void unregister(){
-        this.lock.lock();
+        lock.lock();
         users.remove(new UserData(login));
-        this.lock.unlock();
-
-        out.println("/q");  /// signal to quit
+        lock.unlock();
     }
 
     public void sendToOthers(String message){
-        this.lock.lock();
+        lock.lock();
         for(UserData user: users){
             if(!user.equals(new UserData(login)))     /// different user - send
-                user.sendMessage(login, message);
+                user.getOutputChanel().println(login + ": " + message);
         }
-        this.lock.unlock();
+        lock.unlock();
     }
 }
